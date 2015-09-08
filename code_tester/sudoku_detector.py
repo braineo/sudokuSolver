@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 
-imageRoute = '../test_picture/sudoku4.jpg'
+imageRoute = '../test_picture/sudoku9.jpg'
 originImage = cv2.imread(imageRoute)
 resizeFactor = 500.0 / originImage.shape[0]
 originImage = cv2.resize(
@@ -38,7 +38,7 @@ poly = cv2.approxPolyDP(
 # transform polygon into points
 poly = [i[0] for i in poly]
 
-srtPoints = np.zeros((4,2), dtype=np.float32)
+srtPoints = np.zeros((4, 2), dtype=np.float32)
 # top-left smallest coordinate sum
 # bottom-right largest coordinate sum
 s = np.sum(poly, axis=1)
@@ -50,7 +50,6 @@ d = np.diff(poly, axis=1)
 srtPoints[1] = poly[np.argmin(d)]
 srtPoints[3] = poly[np.argmax(d)]
 
-extracted = np.ndarray((315, 315, originImage.shape[2]))
 extractedPoint = np.array([[0, 0],
                            [314, 0],
                            [314, 314],
@@ -60,7 +59,15 @@ transMatrix = cv2.getPerspectiveTransform(srtPoints, extractedPoint)
 warped = cv2.warpPerspective(originImage, transMatrix, (315, 315))
 
 # -------------------------pick up digits------------------------------- #
-warped = cv2.cvtColor(warped, cv2.COLOR_RGB2GRAY)
-warped = cv2.adaptiveThreshold(warped, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY_INV, 5, 2)
-cv2.imshow("poly", warped)
-cv2.waitKey(0)
+gray = cv2.cvtColor(warped, cv2.COLOR_RGB2GRAY)
+blur = cv2.GaussianBlur(gray, (7, 7), 0)
+thresh = cv2.adaptiveThreshold(
+    blur, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 5, 2)
+kernel = np.array([[0, 1, 0], [1, 1, 1], [0, 1, 0]], np.uint8)
+thresh = cv2.dilate(thresh, kernel)
+
+for i in xrange(0, 315, 35):
+    for j in xrange(0, 315, 35):
+        frag = thresh[i:i + 35, j:j + 35]
+        cv2.imshow("poly", frag)
+        cv2.waitKey(0)
