@@ -55,3 +55,9 @@ docs/_build/
 
 # PyBuilder
 target/
+
+#digit recognition training data
+training_data/
+
+#pycharm directory
+.idea/
