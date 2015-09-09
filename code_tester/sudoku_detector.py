@@ -69,5 +69,6 @@ thresh = cv2.dilate(thresh, kernel)
 for i in xrange(0, 315, 35):
     for j in xrange(0, 315, 35):
         frag = thresh[i:i + 35, j:j + 35]
+        cv2.fastNlMeansDenoising(frag)
         cv2.imshow("poly", frag)
         cv2.waitKey(0)
