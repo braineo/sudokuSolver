@@ -39,10 +39,8 @@ class MNISTdataset(object):
             img = np.fromfile(fimg, dtype=np.uint8).reshape(
                 len(lbl), rows, cols)
 
-        get_img = lambda idx: (lbl[idx], img[idx])
+        return img, lbl
 
-        for i in xrange(len(lbl)):
-            yield get_img(i)
 
     def showImage(self, image):
         """
@@ -60,5 +58,6 @@ class MNISTdataset(object):
         pyplot.show()
 
 dataset = MNISTdataset('../training_data/')
-for i in dataset.read():
-    dataset.showImage(i[1])
+image, label = dataset.read('testing')
+np.save('imageTest', image)
+np.save('labelTest', label)
