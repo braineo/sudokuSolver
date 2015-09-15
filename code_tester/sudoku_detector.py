@@ -1,5 +1,6 @@
 import cv2
 import numpy as np
+import sys
 
 imageRoute = '../test_picture/sudoku9.jpg'
 originImage = cv2.imread(imageRoute)
@@ -66,9 +67,27 @@ thresh = cv2.adaptiveThreshold(
 kernel = np.array([[0, 1, 0], [1, 1, 1], [0, 1, 0]], np.uint8)
 thresh = cv2.dilate(thresh, kernel)
 
+digits = []
 for i in xrange(0, 315, 35):
     for j in xrange(0, 315, 35):
         frag = thresh[i:i + 35, j:j + 35]
-        cv2.fastNlMeansDenoising(frag)
-        cv2.imshow("poly", frag)
-        cv2.waitKey(0)
+        frag = cv2.fastNlMeansDenoising(frag)
+        frag = cv2.resize(frag, (28, 28))
+        digits.append(frag)
+
+trainData = np.load('../training_data/imageTrain.npy')
+trainLabel = np.load('../training_data/labelTrain.npy')
+
+trainData = trainData.reshape(60000, 784).astype(np.float32)
+trainLabel = trainLabel.reshape(-1).astype(np.float32)
+
+knn = cv2.KNearest()
+knn.train(trainData, trainLabel)
+
+for i in digits:
+    test = i.reshape(1, 784).astype(np.float32)
+    image = i
+    retval, results, neighborResponses, dists = knn.find_nearest(test, k=5)
+    print retval, results, neighborResponses, dists
+    cv2.imshow('image', image)
+    cv2.waitKey(0)
