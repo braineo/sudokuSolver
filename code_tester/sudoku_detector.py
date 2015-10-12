@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 import sys
 
-imageRoute = '../test_picture/sudoku9.jpg'
+imageRoute = '../test_picture/sudoku1.jpg'
 originImage = cv2.imread(imageRoute)
 resizeFactor = 500.0 / originImage.shape[0]
 originImage = cv2.resize(
@@ -84,20 +84,20 @@ trainLabel = trainLabel.reshape(-1).astype(np.float32)
 knn = cv2.KNearest()
 knn.train(trainData, trainLabel)
 
-i = digits[0]
-i = cv2.bitwise_not(i, i)
-i = cv2.resize(i, (500,500))
-iCopy = i.copy()
-i = cv2.cvtColor(i, cv2.COLOR_GRAY2BGR)
+for i in digits:
+    i = cv2.bitwise_not(i, i)
+    i = cv2.resize(i, (500,500))
+    iCopy = i.copy()
+    i = cv2.cvtColor(i, cv2.COLOR_GRAY2BGR)
 
-cv2.imshow('image', i)
-cv2.waitKey(0)
-contours, hierarchy = cv2.findContours(iCopy, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-for j, cnt in enumerate(contours):
-    if cv2.contourArea(cnt) > 62500:
-        cv2.drawContours(i, contours, j, (0, 0, 200), 3) # draw all contours
-cv2.imshow('image', i)
-cv2.waitKey(0)
+    mask = np.zeros(i.shape, i.dtype)
+    contours, hierarchy = cv2.findContours(iCopy, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    for j, cnt in enumerate(contours):
+        if cv2.contourArea(cnt) > 40000:
+            cv2.drawContours(mask, contours, j, (255, 255, 255), cv2.cv.CV_FILLED) # draw all contours
+    cv2.bitwise_and(i, mask, i)
+    cv2.imshow('image', i)
+    cv2.waitKey(0)
 test = i.reshape(1, 784).astype(np.float32)
 image = i
 retval, results, neighborResponses, dists = knn.find_nearest(test, k=5)
