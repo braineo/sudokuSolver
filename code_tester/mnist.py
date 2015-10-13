@@ -58,6 +58,6 @@ class MNISTdataset(object):
         pyplot.show()
 
 dataset = MNISTdataset('../training_data/')
-image, label = dataset.read('testing')
-np.save('imageTest', image)
-np.save('labelTest', label)
+image, label = dataset.read()
+np.save('imageTrain', image)
+np.save('labelTrain', label)

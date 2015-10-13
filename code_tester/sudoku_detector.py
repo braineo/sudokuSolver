@@ -1,7 +1,8 @@
 import cv2
 import numpy as np
+import sys
 
-imageRoute = '../test_picture/sudoku9.jpg'
+imageRoute = '../test_picture/sudoku1.jpg'
 originImage = cv2.imread(imageRoute)
 resizeFactor = 500.0 / originImage.shape[0]
 originImage = cv2.resize(
@@ -66,9 +67,39 @@ thresh = cv2.adaptiveThreshold(
 kernel = np.array([[0, 1, 0], [1, 1, 1], [0, 1, 0]], np.uint8)
 thresh = cv2.dilate(thresh, kernel)
 
+digits = []
 for i in xrange(0, 315, 35):
     for j in xrange(0, 315, 35):
         frag = thresh[i:i + 35, j:j + 35]
-        cv2.fastNlMeansDenoising(frag)
-        cv2.imshow("poly", frag)
-        cv2.waitKey(0)
+        frag = cv2.fastNlMeansDenoising(frag)
+        frag = cv2.resize(frag, (28, 28))
+        digits.append(frag)
+
+trainData = np.load('../training_data/imageTrain.npy')
+trainLabel = np.load('../training_data/labelTrain.npy')
+
+trainData = trainData.reshape(60000, 784).astype(np.float32)
+trainLabel = trainLabel.reshape(-1).astype(np.float32)
+
+knn = cv2.KNearest()
+knn.train(trainData, trainLabel)
+
+for i in digits:
+    i = cv2.bitwise_not(i, i)
+    i = cv2.resize(i, (500,500))
+    iCopy = i.copy()
+    i = cv2.cvtColor(i, cv2.COLOR_GRAY2BGR)
+
+    mask = np.zeros(i.shape, i.dtype)
+    contours, hierarchy = cv2.findContours(iCopy, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    for j, cnt in enumerate(contours):
+        if cv2.contourArea(cnt) > 40000:
+            cv2.drawContours(mask, contours, j, (255, 255, 255), cv2.cv.CV_FILLED) # draw all contours
+    cv2.bitwise_and(i, mask, i)
+    cv2.imshow('image', i)
+    cv2.waitKey(0)
+test = i.reshape(1, 784).astype(np.float32)
+image = i
+retval, results, neighborResponses, dists = knn.find_nearest(test, k=5)
+print retval, results, neighborResponses, dists
+
