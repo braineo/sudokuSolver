@@ -1,7 +1,7 @@
 """
 Logic module to solve a Sudoku puzzle.
 Using basic backtracking to find out a valid solution.
-Code bring from my LeetCode practice, may update the method when I got how Algorithm X works
+Code bring from my LeetCode practice, maybe will update the algorithm when I got how Algorithm X works
 """
 import copy
 
@@ -28,6 +28,7 @@ class SudokuSolver(object):
         :param puzzle: numpy.ndarray 2-D array of a Sudoku puzzle
         :return solution: numpy.ndarray 2-D array of solution for the Sudoku puzzle
         """
+        # initiate judgment flags according to puzzle
         for i in xrange(NUM_ROWS):
             for j in xrange(NUM_ROWS):
                 if puzzle[i, j] != 0:
@@ -36,6 +37,7 @@ class SudokuSolver(object):
                         self.col[j][d] = \
                         self.block[i//NUM_BLOCKS*NUM_BLOCKS+j//NUM_BLOCKS][d] = 1
         solution = copy.deepcopy(puzzle)
+        # search from top left if there is a solution for the Sudoku puzzle
         have_solution = self._search_solution(solution, 0, 0)
         if have_solution:
             return solution
@@ -45,12 +47,12 @@ class SudokuSolver(object):
     def _search_solution(self, solution, i, j):
         """
         Search available solution for the Sudoku puzzle
-        :param solution: solution for the Sodoku puzzle
-        :param i: x axis index of digit on the puzzle
-        :param j: y axos index of digit on the puzzle
+        :param solution: numpy.ndarray solution for the Sodoku puzzle
+        :param i: int x axis index of digit on the puzzle
+        :param j: int y axis index of digit on the puzzle
         :return: Boolean if the puzzle have a solution
         """
-
+        # Return True if location is at bottom right
         if i*9+j >= 81:
             return True
         nexti, nextj = (i+1, 0) if j>=NUM_ROWS-1 else (i, j+1)
@@ -73,6 +75,8 @@ class SudokuSolver(object):
                     self.block[block_num][d] = 0
                     solution[i, j] = 0
             return False
+
+
 class ContradictionError(Exception):
     """
     Contradition found in the puzzle
