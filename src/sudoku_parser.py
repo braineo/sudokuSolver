@@ -7,9 +7,11 @@ import numpy as np
 
 SUDOKU_RESIZE = 450  # Pixel size of resized sudoku puzzle
 NUM_ROWS = 9
+OFFSET = SUDOKU_RESIZE/NUM_ROWS//2
 
 
 class SudokuParser(object):
+
     """ Parse sudoku puzzle
 
     Attributes:
@@ -32,8 +34,10 @@ class SudokuParser(object):
         :rtype: cv2.KNearest
         """
 
-        training_sample = np.float32(np.loadtxt('../training_data/feature_vector_pixels2.data'))
-        training_response = np.float32(np.loadtxt('../training_data/samples_pixels2.data'))
+        training_sample = np.float32(
+            np.loadtxt('../training_data/feature_vector_pixels2.data'))
+        training_response = np.float32(
+            np.loadtxt('../training_data/samples_pixels2.data'))
 
         model = cv2.KNearest()
         model.train(training_sample, training_response)
@@ -56,10 +60,24 @@ class SudokuParser(object):
     def draw_solution(self, solution):
         """
         Draw solution of the puzzle on the iamge
-        :param solution: solution to Sudoku puzzle
-        :return:
+        :param solution: numpy.ndarray solution to Sudoku puzzle
+        :return: numpy.ndarray picture with solution on it
         """
-        pass
+
+        for i, row in enumerate(solution):
+            cell_size = SUDOKU_RESIZE // NUM_ROWS
+            celli = i * cell_size
+            for j, d in enumerate(row):
+                if self.puzzle[i, j] == 0:
+                    cellj = j * cell_size
+                    cv2.putText(self.resized_largest_square,
+                                str(int(d)),
+                                (cellj+OFFSET, celli+OFFSET),
+                                cv2.FONT_HERSHEY_PLAIN,
+                                fontScale=1.2,
+                                color=(100, 100, 0),
+                                thickness=2)
+        return self.resized_largest_square
 
     def _find_largest_square(self):
         """
@@ -67,16 +85,18 @@ class SudokuParser(object):
         :return:
         """
 
-        contours, image = self._get_major_contours(self.image, threshold_type=cv2.THRESH_BINARY_INV)
+        contours, image = self._get_major_contours(
+            self.image, threshold_type=cv2.THRESH_BINARY_INV)
         possible_puzzles = {}
         for contour in contours:
             area = cv2.contourArea(contour)
             length = cv2.arcLength(contour, closed=True)
             # Approximate contour into a polygon so that it can be judged
             contour = cv2.approxPolyDP(contour, length * 0.02, closed=True)
-            # if contour has 4 vertices and it is convex, it is possible a puzzle
+            # if contour has 4 vertices and it is convex, it is possible a
+            # puzzle
             if len(contour) == 4 and (
-                            cv2.isContourConvex(contour)):
+                    cv2.isContourConvex(contour)):
                 possible_puzzles[area] = contour
 
         areas = possible_puzzles.keys()
@@ -96,16 +116,16 @@ class SudokuParser(object):
                                                    dilate=False,
                                                    threshold_type=cv2.THRESH_BINARY_INV)
 
-
         kernel = cv2.getStructuringElement(cv2.MORPH_CROSS, (3, 3))
         erode = cv2.erode(image, kernel)
         dilate = cv2.dilate(erode, kernel)
 
-        cv2.imshow("largest square", erode)
-        #cv2.waitKey()
+        #cv2.imshow("largest square", erode)
+        # cv2.waitKey()
         #dilate = erode
         image_copy = dilate.copy()
-        contours, hierarchy = cv2.findContours(image_copy, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+        contours, hierarchy = cv2.findContours(
+            image_copy, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
         for contour in contours:
             area = cv2.contourArea(contour)
             # if 100 < area < 800:
@@ -113,28 +133,26 @@ class SudokuParser(object):
                 (bx, by, bw, bh) = cv2.boundingRect(contour)
                 # if (100 < bw*bh < 1200) and (10 < bw < 40) and (25 < bh < 45):
                 # aju
-                if (100 < bw*bh < 1200) and (5 < bw < 40) and (10 < bh < 45):
+                if (100 < bw * bh < 1200) and (5 < bw < 40) and (10 < bh < 45):
                     # Get the region of interest, which contains the number.
                     roi = dilate[by:by + bh, bx:bx + bw]
                     small_roi = cv2.resize(roi, (10, 10))
-                    cv2.imshow('tmp', roi)
-                    #cv2.waitKey()
+                    #cv2.imshow('tmp', roi)
+                    # cv2.waitKey()
                     feature = small_roi.reshape((1, 100)).astype(np.float32)
 
                     # Use the model to find the most likely number.
                     ret, results, neigh, dist = self.model.find_nearest(
-                            feature, k=1)
+                        feature, k=1)
                     integer = int(results.ravel()[0])
 
                     # gridx and gridy are indices of row and column in Sudoku
-                    gridy = (bx + bw/2) / (SUDOKU_RESIZE / NUM_ROWS)
-                    gridx = (by + bh/2) / (SUDOKU_RESIZE / NUM_ROWS)
+                    gridy = (bx + bw / 2) / (SUDOKU_RESIZE / NUM_ROWS)
+                    gridx = (by + bh / 2) / (SUDOKU_RESIZE / NUM_ROWS)
                     sudoku_matrix.itemset((gridx, gridy), integer)
 
         print sudoku_matrix
         return sudoku_matrix
-
-
 
     def _process_single_digit_image(self, image):
         pass
@@ -166,14 +184,13 @@ class SudokuParser(object):
 
         if dilate:
             thresh = cv2.dilate(thresh,
-                                    kernel=cv2.getStructuringElement(shape=cv2.MORPH_CROSS, ksize=(3, 3)))
+                                kernel=cv2.getStructuringElement(shape=cv2.MORPH_CROSS, ksize=(3, 3)))
 
         return_image = thresh.copy()
         contours, hierachy = cv2.findContours(
             thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
         return contours, return_image
-
 
     def _reorder_vertices(self, square):
         """
@@ -197,7 +214,6 @@ class SudokuParser(object):
 
         return square_reordered
 
-
     def _perspective_sudoku_image(self, square, size):
         """
         Resize image(numpy.ndarray) and perform perspective transform before getting digits on sudoku
@@ -219,5 +235,6 @@ class SudokuParser(object):
 
 
 class ImageError(Exception):
+
     """ Raised when image could not be processed.
     """
