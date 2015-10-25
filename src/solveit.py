@@ -1,7 +1,7 @@
 import sudoku_parser
 import sudoku_solver
 from cv2 import imshow, waitKey
-import
+from sys import
 from os import listdir
 from os.path import isfile, join
 test_path = "../test_picture/"
