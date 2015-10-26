@@ -28,3 +28,7 @@ If the puzzle is correctly recognized and there is a solution to the puzzle. A p
 OCR is the buildin KNN in OpenCV, while the training sampling I use is from [goo.gl/ZgOfvL](goo.gl/ZgOfvL).  
 
 Fonts are limited and handwritten fonts cannot be handled. Handwritten sample can be found in [MNIST](http://yann.lecun.com/exdb/mnist/). A little bit more work needed to extract bitmap from the binary files.
+
+You can change to your own training samples in
+	
+	/src/sudoku_parser.py
