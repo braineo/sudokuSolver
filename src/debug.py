@@ -1,6 +1,7 @@
 import sudoku_parser
 import sudoku_solver
-import cv2
+from cv2 import imshow, waitKey
+import
 from os import listdir
 from os.path import isfile, join
 test_path = "../test_picture/"
@@ -12,5 +13,5 @@ solver = sudoku_solver.SudokuSolver()
 puzzle = sudoku.parse("../test_picture/sudoku9.jpg")
 solution = solver.solve(puzzle)
 sudoku.draw_solution(solution)
-cv2.imshow('result', sudoku.resized_largest_square)
-cv2.waitKey(0)
+imshow('result', sudoku.resized_largest_square)
+waitKey(0)

@@ -8,7 +8,8 @@ import numpy as np
 SUDOKU_RESIZE = 450  # Pixel size of resized sudoku puzzle
 NUM_ROWS = 9
 OFFSET = SUDOKU_RESIZE/NUM_ROWS//2
-
+SAMPLE = '../training_data/feature_vector_pixels2.data'
+LABEL = '../training_data/samples_pixels2.data'
 
 class SudokuParser(object):
 
@@ -35,9 +36,9 @@ class SudokuParser(object):
         """
 
         training_sample = np.float32(
-            np.loadtxt('../training_data/feature_vector_pixels2.data'))
+            np.loadtxt(SAMPLE))
         training_response = np.float32(
-            np.loadtxt('../training_data/samples_pixels2.data'))
+            np.loadtxt(LABEL))
 
         model = cv2.KNearest()
         model.train(training_sample, training_response)

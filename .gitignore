@@ -58,6 +58,8 @@ target/
 
 #digit recognition training data
 training_data/
+!training_data/feature_vector_pixels2.data
+!training_data/samples_pixels2.data
 
 #pycharm directory
 .idea/
