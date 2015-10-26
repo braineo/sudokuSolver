@@ -57,9 +57,10 @@ docs/_build/
 target/
 
 #digit recognition training data
-training_data/
-!training_data/feature_vector_pixels2.data
-!training_data/samples_pixels2.data
+training_data/t10k-images.idx3-ubyte
+training_data/t10k-labels.idx1-ubyte
+training_data/train-images.idx3-ubyte
+training_data/train-labels.idx1-ubyte
 
 #pycharm directory
 .idea/
